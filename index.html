@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reclutamiento - GREMIO S4NGR3FRI4</title>
+    <title>Reclutamiento - GREMIO S4NGR3FRI4 (Metin2)</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -22,13 +22,21 @@
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2);
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             border-left: 5px solid #b30000;
         }
         h2 {
             text-align: center;
             color: #ff3333;
             margin-bottom: 25px;
+            letter-spacing: 2px;
+        }
+        .row {
+            display: flex;
+            gap: 15px;
+        }
+        .row .form-group {
+            flex: 1;
         }
         .form-group {
             margin-bottom: 20px;
@@ -62,6 +70,7 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
+            text-transform: uppercase;
             transition: background-color 0.3s;
         }
         button:hover {
@@ -74,40 +83,61 @@
 <div class="container">
     <h2>GREMIO S4NGR3FRI4</h2>
     <form id="recruitmentForm">
-        <div class="form-group">
-            <label for="playerName">Nombre del Personaje:</label>
-            <input type="text" id="playerName" name="playerName" required>
+        
+        <div class="row">
+            <div class="form-group">
+                <label for="playerName">Nombre del Personaje:</label>
+                <input type="text" id="playerName" name="playerName" required placeholder="Ej: AsesinoX">
+            </div>
+            <div class="form-group">
+                <label for="playerLevel">Nivel:</label>
+                <input type="number" id="playerLevel" name="playerLevel" min="1" max="120" required placeholder="Ej: 75">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label for="kingdom">Reino:</label>
+                <select id="kingdom" name="kingdom" required>
+                    <option value="">Selecciona tu Reino</option>
+                    <option value="Shinsoo">Shinsoo (Rojo)</option>
+                    <option value="Chunjo">Chunjo (Amarillo)</option>
+                    <option value="Jinno">Jinno (Azul)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="charClass">Clase:</label>
+                <select id="charClass" name="charClass" required onchange="updateSubClasses()">
+                    <option value="">Selecciona tu Clase</option>
+                    <option value="Guerrero">Guerrero</option>
+                    <option value="Ninja">Ninja</option>
+                    <option value="Sura">Sura</option>
+                    <option value="Chaman">Chamán</option>
+                    <!-- Licano eliminado como pediste -->
+                </select>
+            </div>
         </div>
 
         <div class="form-group">
-            <label for="playerClass">Clase:</label>
-            <select id="playerClass" name="playerClass" required>
-                <option value="">Selecciona una clase</option>
-                <option value="Dark Wizard">Dark Wizard</option>
-                <option value="Dark Knight">Dark Knight</option>
-                <option value="Fairy Elf">Fairy Elf</option>
-                <option value="Magic Gladiator">Magic Gladiator</option>
-                <option value="Dark Lord">Dark Lord</option>
-                <option value="Summoner">Summoner</option>
-                <option value="Rage Fighter">Rage Fighter</option>
-                <option value="Grow Lancer">Grow Lancer</option>
-                <option value="Rune Wizard">Rune Wizard</option>
-                <option value="Slayer">Slayer</option>
-                <option value="Gun Crusher">Gun Crusher</option>
-                <option value="Light Wizard">Light Wizard</option>
-                <option value="Lemuria">Lemuria</option>
-                <option value="Illusion Knight">Illusion Knight</option>
+            <label for="subClass">Doctrina / Especialización:</label>
+            <select id="subClass" name="subClass" required>
+                <option value="">Primero selecciona una clase</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label for="resets">Resets / Nivel:</label>
-            <input type="text" id="resets" name="resets" placeholder="Ej: 500 Resets / 400 Master Level" required>
+            <label for="mainSkills">Estado de Habilidades (Skills en P / G / M):</label>
+            <textarea id="mainSkills" name="mainSkills" rows="2" placeholder="Ej: Aura P, Giro G1..." required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="previousGuild">Gremio al que Perteneció Anteriormente:</label>
+            <input type="text" id="previousGuild" name="previousGuild" placeholder="Ej: Ninguno / Nombre del gremio anterior" required>
         </div>
 
         <div class="form-group">
             <label for="experience">Experiencia previa en el servidor:</label>
-            <textarea id="experience" name="experience" rows="4" placeholder="Cuéntanos sobre tu experiencia..." required></textarea>
+            <textarea id="experience" name="experience" rows="3" placeholder="Cuéntanos sobre tu experiencia en el juego..." required></textarea>
         </div>
 
         <button type="submit">Enviar Solicitud</button>
@@ -115,24 +145,57 @@
 </div>
 
 <script>
+    // Dinámica para cambiar las doctrinas (Sin Licano)
+    const subClassesData = {
+        "Guerrero": ["Corporal (Cuerpo a Cuerpo)", "Mental (Defensa/Tanque)"],
+        "Ninja": ["Cercano (Dagas)", "Distancia (Arco)"],
+        "Sura": ["Armas Mágicas (PVM)", "Magia Negra (PVP)"],
+        "Chaman": ["Dragón (Buffs/Críticos)", "Curación (Soporte)"]
+    };
+
+    function updateSubClasses() {
+        const classSelect = document.getElementById("charClass");
+        const subClassSelect = document.getElementById("subClass");
+        const selectedClass = classSelect.value;
+
+        subClassSelect.innerHTML = '<option value="">Selecciona tu Doctrina</option>';
+
+        if (selectedClass && subClassesData[selectedClass]) {
+            subClassesData[selectedClass].forEach(sub => {
+                const option = document.createElement("option");
+                option.value = sub;
+                option.textContent = sub;
+                subClassSelect.appendChild(option);
+            });
+        }
+    }
+
+    // Webhook de Discord
     const WEBHOOK_URL = "https://discord.com/api/webhooks/1540060827539873836/Vydsk8m80gFjye_8J0AGBnN3UY_rnD_ThkX9gO5H4mau5wyvY7FXQ_JgQqCBTk4mbZHb";
 
     document.getElementById('recruitmentForm').addEventListener('submit', function(e) {
         e.preventDefault();
 
         const playerName = document.getElementById('playerName').value;
-        const playerClass = document.getElementById('playerClass').value;
-        const resets = document.getElementById('resets').value;
+        const playerLevel = document.getElementById('playerLevel').value;
+        const kingdom = document.getElementById('kingdom').value;
+        const charClass = document.getElementById('charClass').value;
+        const subClass = document.getElementById('subClass').value;
+        const mainSkills = document.getElementById('mainSkills').value;
+        const previousGuild = document.getElementById('previousGuild').value;
         const experience = document.getElementById('experience').value;
 
         const discordPayload = {
             embeds: [{
-                title: "⚔️ Nueva Solicitud de Ingreso - S4NGR3FRI4 ⚔️",
-                color: 11750400, // Color rojo oscuro corporativo
+                title: "⚔️ Nueva Solicitud - S4NGR3FRI4 (Metin2) ⚔️",
+                color: 11750400, // Rojo oscuro
                 fields: [
                     { name: "👤 Personaje", value: playerName, inline: true },
-                    { name: "🛡️ Clase", value: playerClass, inline: true },
-                    { name: "📊 Resets/Nivel", value: resets, inline: false },
+                    { name: "📈 Nivel", value: playerLevel, inline: true },
+                    { name: "🏰 Reino", value: kingdom, inline: true },
+                    { name: "🛡️ Clase y Doctrina", value: `${charClass} - ${subClass}`, inline: false },
+                    { name: "✨ Habilidades", value: mainSkills, inline: false },
+                    { name: "🚩 Gremio Anterior", value: previousGuild, inline: false },
                     { name: "💬 Experiencia", value: experience, inline: false }
                 ],
                 timestamp: new Date().toISOString()
@@ -141,15 +204,14 @@
 
         fetch(WEBHOOK_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(discordPayload)
         })
         .then(response => {
             if (response.ok) {
                 alert('¡Solicitud enviada con éxito a Discord!');
                 document.getElementById('recruitmentForm').reset();
+                document.getElementById("subClass").innerHTML = '<option value="">Primero selecciona una clase</option>';
             } else {
                 alert('Hubo un error al enviar la solicitud.');
             }
@@ -162,4 +224,5 @@
 </script>
 
 </body>
-</html>
+                </html>
+            
