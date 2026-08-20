@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reclutamiento Gremio - S4NGR3FRI4 / Royale Online 2</title>
+    <style>
+        :root {
+            --bg-color: #0f1016;
+            --card-bg: #181a26;
+            --accent-color: #d4af37; /* Dorado clásico */
+            --accent-hover: #f3c653;
+            --text-color: #e0e0e0;
+            --border-color: #2a2d40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--accent-color);
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            background: #0f1016;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-color);
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .row .form-group {
+            flex: 1;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--accent-color);
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Reclutamiento Gremio</h2>
+    <form id="guildForm">
+        
+        <!-- Información General -->
+        <div class="row">
+            <div class="form-group">
+                <label for="playerName">Nombre del Personaje:</label>
+                <input type="text" id="playerName" name="playerName" required placeholder="Ej: AsesinoX">
+            </div>
+            <div class="form-group">
+                <label for="playerLevel">Nivel:</label>
+                <input type="number" id="playerLevel" name="playerLevel" min="1" max="120" required placeholder="Ej: 75">
+            </div>
+        </div>
+
+        <!-- Reino y Clase -->
+        <div class="row">
+            <div class="form-group">
+                <label for="kingdom">Reino:</label>
+                <select id="kingdom" name="kingdom" required>
+                    <option value="">Selecciona tu Reino</option>
+                    <option value="Shinsoo">Shinsoo (Imperio Rojo)</option>
+                    <option value="Chunjo">Chunjo (Imperio Amarillo)</option>
+                    <option value="Jinno">Jinno (Imperio Azul)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="charClass">Clase:</label>
+                <select id="charClass" name="charClass" required onchange="updateSubClasses()">
+                    <option value="">Selecciona tu Clase</option>
+                    <option value="Guerrero">Guerrero</option>
+                    <option value="Ninja">Ninja</option>
+                    <option value="Sura">Sura</option>
+                    <option value="Chaman">Chamán</option>
+                    <option value="Licano">Licano (si aplica)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Especialización / Doctrina -->
+        <div class="form-group">
+            <label for="subClass">Doctrina / Especialización:</label>
+            <select id="subClass" name="subClass" required>
+                <option value="">Primero selecciona una clase</option>
+            </select>
+        </div>
+
+        <!-- Habilidades Principales -->
+        <div class="form-group">
+            <label for="mainSkills">Estado de Habilidades (Skills en P / G / M):</label>
+            <textarea id="mainSkills" name="mainSkills" rows="3" placeholder="Ej: Aura de Espada P, Giro de Espada G1, Berserker M8..." required></textarea>
+        </div>
+
+        <!-- Experiencia y Equipo -->
+        <div class="form-group">
+            <label for="experience">Experiencia en Metin2 / Royale Online 2:</label>
+            <textarea id="experience" name="experience" rows="2" placeholder="¿Cuánto tiempo llevas jugando? ¿Qué experiencia tienes en Guerras de Gremio (Warp)?"></textarea>
+        </div>
+
+        <button type="submit">Enviar Postulación</button>
+    </form>
+</div>
+
+<script>
+    // Dinámica para cambiar las sub-clases/doctrinas según la clase elegida
+    const subClassesData = {
+        "Guerrero": ["Corporal (Cuerpo a Cuerpo)", "Mental (Defensa/Tanque)"],
+        "Ninja": ["Cercano (Dagas/Espadas)", "Distancia (Arco)"],
+        "Sura": ["Armas Mágicas (PVM/Solo)", "Espejo / Magia Negra (PVP)"],
+        "Chaman": ["Dragón (Buffs/Daño Mágico)", "Curación (Soporte/PVP)"],
+        "Licano": ["Instinto (Daño Físico/Sangrado)"]
+    };
+
+    function updateSubClasses() {
+        const classSelect = document.getElementById("charClass");
+        const subClassSelect = document.getElementById("subClass");
+        const selectedClass = classSelect.value;
+
+        // Limpiar opciones anteriores
+        subClassSelect.innerHTML = '<option value="">Selecciona tu Doctrina</option>';
+
+        if (selectedClass && subClassesData[selectedClass]) {
+            subClassesData[selectedClass].forEach(sub => {
+                const option = document.createElement("option");
+                option.value = sub;
+                option.textContent = sub;
+                subClassSelect.appendChild(option);
+            });
+        }
+    }
+
+    // Manejo del envío del formulario (puedes adaptarlo para enviar por Discord Webhook, WhatsApp o Base de Datos)
+    document.getElementById("guildForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            name: document.getElementById("playerName").value,
+            level: document.getElementById("playerLevel").value,
+            kingdom: document.getElementById("kingdom").value,
+            charClass: document.getElementById("charClass").value,
+            subClass: document.getElementById("subClass").value,
+            skills: document.getElementById("mainSkills").value,
+            experience: document.getElementById("experience").value
+        };
+
+        console.log("Datos de postulación:", formData);
+        alert("¡Postulación enviada con éxito! Los líderes revisarán tu información.");
+        document.getElementById("guildForm").reset();
+        document.getElementById("subClass").innerHTML = '<option value="">Primero selecciona una clase</option>';
+    });
+</script>
+
+</body>
+</html>
+
