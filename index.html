@@ -140,6 +140,11 @@
             background-color: #ff3333;
             box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);
         }
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
     </style>
 </head>
 <body>
@@ -150,7 +155,7 @@
     
     <form id="recruitmentForm">
         
-        <!-- Fecha Automática Oculta/Deshabilitada -->
+        <!-- Fecha Automática Deshabilitada -->
         <div class="form-group">
             <label for="fechaHora">Fecha y Hora de Postulación:</label>
             <input type="text" id="fechaHora" name="fechaHora" disabled>
@@ -188,7 +193,7 @@
                     <option value="🇵🇦 Panamá (+507)">🇵🇦 Panamá (+507)</option>
                     <!-- Norteamérica -->
                     <option value="🇺🇸 Estados Unidos (+1)">🇺🇸 Estados Unidos (+1)</option>
-                    <!-- Europa (Comunidad Fuerte de Metin2) -->
+                    <!-- Europa -->
                     <option value="🇪🇸 España (+34)">🇪🇸 España (+34)</option>
                     <option value="🇩🇪 Alemania (+49)">🇩🇪 Alemania (+49)</option>
                     <option value="🇷🇴 Rumania (+40)">🇷🇴 Rumania (+40)</option>
@@ -258,22 +263,21 @@
             <label for="acceptRules">Juro lealtad y acepto cumplir el Código de Honor del gremio.</label>
         </div>
 
-        <button type="submit">Enviar Postulación</button>
+        <button type="submit" id="btnSubmit">Enviar Postulación</button>
     </form>
 </div>
 
 <script>
-    // 1. Reloj automático para la fecha de registro
+    // 1. Reloj automático para fecha y hora de registro
     function actualizarFecha() {
         const inputFecha = document.getElementById('fechaHora');
         const ahora = new Date();
-        // Formato: DD/MM/YYYY, HH:MM:SS
         inputFecha.value = ahora.toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'medium' });
     }
     setInterval(actualizarFecha, 1000);
-    actualizarFecha(); // Carga inicial
+    actualizarFecha();
 
-    // 2. Dinámica de Clases
+    // 2. Doctrinas por Clase
     const subClassesData = {
         "Guerrero": ["Corporal (Cuerpo a Cuerpo)", "Mental (Defensa/Tanque)"],
         "Ninja": ["Cercano (Dagas)", "Distancia (Arco)"],
@@ -298,22 +302,27 @@
         }
     }
 
-    // 3. Webhook a Discord
-    const WEBHOOK_URL = "https://discord.com/api/webhooks/1540060827539873836/Vydsk8m80gFjye_8J0AGBnN3UY_rnD_ThkX9gO5H4mau5wyvY7FXQ_JgQqCBTk4mbZHb"; // <--- REEMPLAZAR AQUÍ
+    // 3. Webhook de Discord
+    const WEBHOOK_URL = "https://discord.com/api/webhooks/1540060827539873836/Vydsk8m80gFjye_8J0AGBnN3UY_rnD_ThkX9gO5H4mau5wyvY7FXQ_JgQqCBTk4mbZHb";
 
-    document.getElementById('recruitmentForm').addEventListener('submit', function(e) {
+    document.getElementById('recruitmentForm').addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        const fechaHora = document.getElementById('fechaHora').value;
-        const playerName = document.getElementById('playerName').value;
-        const playerLevel = document.getElementById('playerLevel').value;
-        const pais = document.getElementById('pais').value;
-        const telefono = document.getElementById('telefono').value;
-        const kingdom = document.getElementById('kingdom').value;
-        const charClass = document.getElementById('charClass').value;
-        const subClass = document.getElementById('subClass').value;
-        const mainSkills = document.getElementById('mainSkills').value;
-        const previousGuild = document.getElementById('previousGuild').value;
+        const btnSubmit = document.getElementById('btnSubmit');
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = "ENVIANDO POSTULACIÓN...";
+
+        // Captura de valores con protección ante campos vacíos
+        const fechaHora = document.getElementById('fechaHora').value || new Date().toLocaleString();
+        const playerName = document.getElementById('playerName').value.trim() || "No especificado";
+        const playerLevel = document.getElementById('playerLevel').value.trim() || "1";
+        const pais = document.getElementById('pais').value || "No especificado";
+        const telefono = document.getElementById('telefono').value.trim() || "No especificado";
+        const kingdom = document.getElementById('kingdom').value || "No especificado";
+        const charClass = document.getElementById('charClass').value || "No especificado";
+        const subClass = document.getElementById('subClass').value || "No especificada";
+        const mainSkills = document.getElementById('mainSkills').value.trim() || "No especificadas";
+        const previousGuild = document.getElementById('previousGuild').value.trim() || "Ninguno";
 
         const discordPayload = {
             embeds: [{
@@ -335,24 +344,29 @@
             }]
         };
 
-        fetch(WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(discordPayload)
-        })
-        .then(response => {
+        try {
+            const response = await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(discordPayload)
+            });
+
             if (response.ok) {
                 alert('¡Tus datos han sido enviados al consejo del gremio! Te contactaremos pronto.');
                 document.getElementById('recruitmentForm').reset();
                 document.getElementById("subClass").innerHTML = '<option value="" disabled selected>Primero selecciona una clase</option>';
             } else {
-                alert('Hubo un error al enviar la solicitud al servidor.');
+                const errorText = await response.text();
+                console.error("Error respuesta Discord:", errorText);
+                alert(`Error al enviar a Discord (${response.status}): ${errorText || 'Verifica la URL del Webhook'}`);
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error de conexión. Revisa tu internet o contacta a un administrador.');
-        });
+        } catch (error) {
+            console.error('Error de red:', error);
+            alert('Error de conexión o bloqueo de navegador (AdBlock). Revisa tu conexión a internet.');
+        } finally {
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = "ENVIAR POSTULACIÓN";
+        }
     });
 </script>
 
